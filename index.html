@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>처인 활동지원사 근로관리</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#5b2a86">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="처인 근로관리">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/favicon.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<style>
+  html,body{margin:0;height:100%;background:#fff;font-family:system-ui,-apple-system,"Noto Sans KR",sans-serif}
+  #app{position:fixed;inset:0;border:0;width:100%;height:100%;padding-top:env(safe-area-inset-top)}
+  #load{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;background:#fff;color:#5b2a86;font-size:22px;font-weight:700;z-index:2}
+  #load img{width:96px;height:96px}
+  #err{display:none;position:fixed;inset:0;background:#fff;z-index:3;padding:28px;box-sizing:border-box;font-size:20px;line-height:1.6;color:#222;overflow:auto}
+  #err h1{font-size:24px;color:#5b2a86}
+  .btn{display:block;width:100%;box-sizing:border-box;text-align:center;font-size:22px;font-weight:700;padding:18px;border-radius:14px;border:0;margin-top:14px;background:#5b2a86;color:#fff;text-decoration:none}
+  .btn.line{background:#fff;color:#5b2a86;border:3px solid #5b2a86}
+  #inst{display:none;position:fixed;left:12px;right:12px;bottom:12px;z-index:4;background:#5b2a86;color:#fff;border-radius:16px;padding:14px;font-size:19px;box-shadow:0 4px 16px rgba(0,0,0,.3)}
+  #inst button{font-size:20px;font-weight:700;border:0;border-radius:10px;padding:10px 16px;margin-top:8px;margin-right:8px}
+</style>
+</head>
+<body>
+<div id="load"><img src="icons/icon-192.png" alt=""><div>처인 근로관리</div><div style="font-size:16px;font-weight:400;color:#666">불러오는 중입니다…</div></div>
+<iframe id="app" title="처인 활동지원사 근로관리" allow="clipboard-write" referrerpolicy="no-referrer"></iframe>
+<div id="err">
+  <h1>화면을 불러오지 못했어요</h1>
+  <p>인터넷 연결을 확인한 뒤 다시 시도해 주세요. 계속 안 되면 아래 ‘브라우저로 열기’를 눌러 주세요.</p>
+  <button class="btn" onclick="load()">다시 시도</button>
+  <a class="btn line" id="ext" target="_blank" rel="noopener">브라우저로 열기</a>
+</div>
+<div id="inst"><div>📲 이 앱을 휴대폰에 설치할 수 있어요.</div><button id="instgo" style="background:#fff;color:#5b2a86">설치하기</button><button id="instno" style="background:transparent;color:#fff">나중에</button></div>
+<script src="config.js"></script>
+<script>
+(function () {
+  var f = document.getElementById('app'), L = document.getElementById('load'), E = document.getElementById('err'), done = false, timer;
+  document.getElementById('ext').href = window.APP_URL;
+  function fail() { if (done) return; L.style.display = 'none'; E.style.display = 'block'; }
+  window.load = function () {
+    done = false; E.style.display = 'none'; L.style.display = 'flex';
+    if (!navigator.onLine) { setTimeout(fail, 300); return; }
+    f.src = window.APP_URL; clearTimeout(timer); timer = setTimeout(fail, 25000);
+  };
+  f.addEventListener('load', function () { done = true; clearTimeout(timer); L.style.display = 'none'; });
+  window.addEventListener('online', function () { if (E.style.display === 'block') window.load(); });
+  if (!window.APP_URL || /여기에/.test(window.APP_URL)) { document.querySelector('#err p').textContent = '앱 주소(config.js의 APP_URL)가 설정되지 않았습니다.'; fail(); } else window.load();
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(function () {});
+  var dp, I = document.getElementById('inst');
+  window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); dp = e; if (!matchMedia('(display-mode: standalone)').matches && !sessionStorage.getItem('noinst')) I.style.display = 'block'; });
+  document.getElementById('instgo').onclick = function () { I.style.display = 'none'; if (dp) dp.prompt(); };
+  document.getElementById('instno').onclick = function () { I.style.display = 'none'; try { sessionStorage.setItem('noinst', 1); } catch (e) {} };
+  window.addEventListener('appinstalled', function () { I.style.display = 'none'; });
+})();
+</script>
+</body>
+</html>
